@@ -9,5 +9,7 @@ namespace RomanNumerals
     public interface IRomanNumeralsConverter
     {
         string Convert(short number);
+
+        string Convert(string text, out int numberOfReplacement);
     }
 }

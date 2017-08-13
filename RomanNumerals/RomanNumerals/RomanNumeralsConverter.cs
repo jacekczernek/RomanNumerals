@@ -27,6 +27,11 @@ namespace RomanNumerals
             return result.ToString().TrimEnd(' ');
         }
 
+        public string Convert(string text, out int numberOfReplacement)
+        {
+            throw new NotImplementedException();
+        }
+
         private string GetRomanDigitForRange(short value, int rangeBase)
         {
             switch (rangeBase)
