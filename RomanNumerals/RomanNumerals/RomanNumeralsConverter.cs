@@ -29,7 +29,12 @@ namespace RomanNumerals
 
         public string Convert(string text, out int numberOfReplacement)
         {
-            throw new NotImplementedException();
+            var result = "";
+            numberOfReplacement = 0;
+
+
+
+            return result;
         }
 
         private string GetRomanDigitForRange(short value, int rangeBase)

@@ -172,6 +172,18 @@ namespace RomanNumeralsTest
         }
 
         [TestMethod]
+        public void Convert_TextWithNumbersNextToEachOtherWithExtraSpace_Success()
+        {
+            var input = "Lorem ipsum 357  746 dolor sit amet.";
+            int replacements;
+
+            var result = converter.Convert(input, out replacements);
+
+            Assert.AreEqual("Lorem ipsum CCC L VII  DCC XL VI dolor sit amet.", result);
+            Assert.AreEqual(2, replacements);
+        }
+
+        [TestMethod]
         public void Convert_MultipleLineTextWithNumbers_Success()
         {
             var input = @"746 Lorem ipsum
@@ -213,6 +225,18 @@ ipsum ipsum MMM", result);
 
             Assert.AreEqual("", result);
             Assert.AreEqual(0, replacements);
+        }
+
+        [TestMethod]
+        public void Convert_TextWithTwiceTheSameNumber_Success()
+        {
+            var input = "Lorem 357 ipsum 357 dolor sit amet.";
+            int replacements;
+
+            var result = converter.Convert(input, out replacements);
+
+            Assert.AreEqual("Lorem CCC L VII ipsum CCC L VII dolor sit amet.", result);
+            Assert.AreEqual(2, replacements);
         }
 
         [TestMethod]
