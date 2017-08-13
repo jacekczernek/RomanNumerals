@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RomanNumerals
 {
     public class RomanNumeralsConverter : IRomanNumeralsConverter
     {
+        private const string regexPattern = @"(\d+(\s\d+)+)|(\d+)";
+        private int replacementCounter;
+
         public string Convert(short number)
         {
             if (number < 1 || number > 3999)
@@ -26,15 +31,45 @@ namespace RomanNumerals
 
             return result.ToString().TrimEnd(' ');
         }
-
-        public string Convert(string text, out int numberOfReplacement)
+        
+        public string Convert(string text, out int numberOfReplacements)
         {
-            var result = "";
-            numberOfReplacement = 0;
+            replacementCounter = 0;
 
-
+            var result = Regex.Replace(text, regexPattern, RegexEvaluator);
+            numberOfReplacements = replacementCounter;
 
             return result;
+        }
+
+        private string RegexEvaluator(Match input)
+        {
+            if (input.Value.Contains(" "))
+            {
+                var separateNumbers = input.Value.Split(' ');
+                var results = new List<string>(separateNumbers.Length);
+
+                foreach (var item in separateNumbers)
+                {
+                    results.Add(ConvertSingleTextNumber(item));
+                }
+
+                return String.Join(", ", results);
+            }
+            else
+                return ConvertSingleTextNumber(input.Value);
+        }
+
+        private string ConvertSingleTextNumber(string input)
+        {
+            short number;
+            if (short.TryParse(input, out number))
+            {
+                replacementCounter++;
+                return Convert(number);
+            }
+            else
+                throw new ArgumentOutOfRangeException("Number should be between 1 and 3999");
         }
 
         private string GetRomanDigitForRange(short value, int rangeBase)

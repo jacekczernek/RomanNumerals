@@ -240,8 +240,7 @@ ipsum ipsum MMM", result);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void Convert_TextWithNegativeNumber_ThrowException()
+        public void Convert_TextWithNegativeNumber_Success()
         {
             var input = "Some negative number -345 example";
             int replacements;

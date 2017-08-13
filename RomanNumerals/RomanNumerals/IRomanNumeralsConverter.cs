@@ -10,6 +10,6 @@ namespace RomanNumerals
     {
         string Convert(short number);
 
-        string Convert(string text, out int numberOfReplacement);
+        string Convert(string text, out int numberOfReplacements);
     }
 }
