@@ -9,6 +9,12 @@ namespace RomanNumeralsTest
     {
         private IRomanNumeralsConverter converter;
 
+        [TestInitialize]
+        public void Initialize()
+        {
+            converter = new RomanNumeralsConverter();
+        }
+
         [TestMethod]
         public void Convert_CorrectSingleDigitInput_Success()
         {
@@ -49,7 +55,7 @@ namespace RomanNumeralsTest
 
             var result = converter.Convert(input);
 
-            Assert.AreEqual("IIIM CM XC IX", result);
+            Assert.AreEqual("MMM CM XC IX", result);
         }
 
         [TestMethod]
