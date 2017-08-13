@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace RomanNumerals
 {
     public class RomanNumeralsConverter : IRomanNumeralsConverter
     {
         private const string regexPattern = @"(\d+(\s\d+)+)|(\d+)";
-        private int replacementCounter;
+        
+        private ThreadLocal<int> replacementCounter = new ThreadLocal<int>();
 
         public string Convert(short number)
         {
@@ -34,10 +36,10 @@ namespace RomanNumerals
         
         public string Convert(string text, out int numberOfReplacements)
         {
-            replacementCounter = 0;
-
+            replacementCounter.Value = 0;
+            
             var result = Regex.Replace(text, regexPattern, RegexEvaluator);
-            numberOfReplacements = replacementCounter;
+            numberOfReplacements = replacementCounter.Value;
 
             return result;
         }
@@ -65,7 +67,7 @@ namespace RomanNumerals
             short number;
             if (short.TryParse(input, out number))
             {
-                replacementCounter++;
+                replacementCounter.Value++;
                 return Convert(number);
             }
             else

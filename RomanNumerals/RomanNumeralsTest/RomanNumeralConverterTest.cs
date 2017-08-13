@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RomanNumerals;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RomanNumeralsTest
 {
@@ -269,6 +271,42 @@ ipsum ipsum MMM", result);
             int replacements;
 
             var result = converter.Convert(input, out replacements);
+        }
+
+        [TestMethod]
+        public void Convert_MultipleInputsRunInParallel_Success()
+        {
+            var inputCollection = new string[10];
+            inputCollection[0] = "Some negative number -345 example";
+            inputCollection[1] = "Some negative number -345 example 345";
+            inputCollection[2] = "Some negative number -345 example 345 345";
+            inputCollection[3] = "Some negative number -345 example 345 345 345";
+            inputCollection[4] = "Some negative number -345 example 345 345 345 345";
+            inputCollection[5] = "Some negative number -345 example 345 345 345 345 345";
+            inputCollection[6] = "Some negative number -345 example 345 345 345 345 345 345";
+            inputCollection[7] = "Some negative number -345 example 345 345 345 345 345 345 345";
+            inputCollection[8] = "Some negative number -345 example 345 345 345 345 345 345 345 345";
+            inputCollection[9] = "Some negative number -345 example 345 345 345 345 345 345 345 345 345";
+
+            var resultCollection = new Dictionary<string, int>(10);
+            Parallel.ForEach(inputCollection, input => 
+            {
+                int replacements;
+                var result = converter.Convert(input, out replacements);
+
+                resultCollection.Add(input, replacements);
+            });
+
+            Assert.AreEqual(1, resultCollection[inputCollection[0]]);
+            Assert.AreEqual(2, resultCollection[inputCollection[1]]);
+            Assert.AreEqual(3, resultCollection[inputCollection[2]]);
+            Assert.AreEqual(4, resultCollection[inputCollection[3]]);
+            Assert.AreEqual(5, resultCollection[inputCollection[4]]);
+            Assert.AreEqual(6, resultCollection[inputCollection[5]]);
+            Assert.AreEqual(7, resultCollection[inputCollection[6]]);
+            Assert.AreEqual(8, resultCollection[inputCollection[7]]);
+            Assert.AreEqual(9, resultCollection[inputCollection[8]]);
+            Assert.AreEqual(10, resultCollection[inputCollection[9]]);
         }
     }
 }
