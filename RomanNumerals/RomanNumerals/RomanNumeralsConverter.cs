@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -9,29 +9,37 @@ namespace RomanNumerals
     public class RomanNumeralsConverter : IRomanNumeralsConverter
     {
         private const string regexPattern = @"(\d+(\s\d+)+)|(\d+)";
-        
+        private const string outOfRangeExceptionMessage = "Number should be between 1 and 3999";
         private ThreadLocal<int> replacementCounter = new ThreadLocal<int>();
+        private static ConcurrentDictionary<short, string> cache = new ConcurrentDictionary<short, string>();
 
         public string Convert(short number)
         {
             if (number < 1 || number > 3999)
-                throw new ArgumentOutOfRangeException("Number should be between 1 and 3999");
+                throw new ArgumentOutOfRangeException(outOfRangeExceptionMessage);
 
-            var result = new StringBuilder();
-            var numberAsCharArray = number.ToString();
+            string cachedValue;
+            if (cache.TryGetValue(number, out cachedValue))
+                return cachedValue;
             
+            var numberAsCharArray = number.ToString();
+            var resultBuilder = new StringBuilder(numberAsCharArray.Length);
+
             for (int i = 0; i < numberAsCharArray.Length; i++)
             {
                 var digit = short.Parse(numberAsCharArray[i].ToString());
-                var rangeBase = (int)Math.Pow(10, (numberAsCharArray.Length - i - 1));
+                var digitBase = (int)Math.Pow(10, (numberAsCharArray.Length - i - 1));
 
-                var romanDigit = GetRomanDigitForRange(digit, rangeBase);
+                var romanDigit = GetRomanDigitForRange(digit, digitBase);
 
                 if (!String.IsNullOrWhiteSpace(romanDigit))
-                    result.AppendFormat("{0} ", romanDigit);
+                    resultBuilder.AppendFormat("{0} ", romanDigit);
             }
 
-            return result.ToString().TrimEnd(' ');
+            var result = resultBuilder.ToString().TrimEnd(' ');
+
+            cache.TryAdd(number, result);
+            return result;
         }
         
         public string Convert(string text, out int numberOfReplacements)
@@ -49,14 +57,14 @@ namespace RomanNumerals
             if (input.Value.Contains(" "))
             {
                 var separateNumbers = input.Value.Split(' ');
-                var results = new List<string>(separateNumbers.Length);
+                var results = new StringBuilder(separateNumbers.Length);
 
                 foreach (var item in separateNumbers)
                 {
-                    results.Add(ConvertSingleTextNumber(item));
+                    results.AppendFormat("{0}, ", ConvertSingleTextNumber(item));
                 }
 
-                return String.Join(", ", results);
+                return results.ToString().TrimEnd(' ',',');
             }
             else
                 return ConvertSingleTextNumber(input.Value);
@@ -71,33 +79,33 @@ namespace RomanNumerals
                 return Convert(number);
             }
             else
-                throw new ArgumentOutOfRangeException("Number should be between 1 and 3999");
+                throw new ArgumentOutOfRangeException(outOfRangeExceptionMessage);
         }
 
-        private string GetRomanDigitForRange(short value, int rangeBase)
+        private string GetRomanDigitForRange(short digit, int digitBase)
         {
-            switch (rangeBase)
+            switch (digitBase)
             {
                 case 1:
-                    return ConstructRomanDigit(value, 'I', 'V', 'X');
+                    return ConstructRomanDigit(digit, 'I', 'V', 'X');
                 case 10:
-                    return ConstructRomanDigit(value, 'X', 'L', 'C');
+                    return ConstructRomanDigit(digit, 'X', 'L', 'C');
                 case 100:
-                    return ConstructRomanDigit(value, 'C', 'D', 'M');
+                    return ConstructRomanDigit(digit, 'C', 'D', 'M');
                 case 1000:
-                    if (value > 3)
+                    if (digit > 3)
                         throw new NotImplementedException();
 
-                    return ConstructRomanDigit(value, 'M', ' ', ' ');
+                    return ConstructRomanDigit(digit, 'M', ' ', ' ');
                 default:
                     throw new ArgumentOutOfRangeException("Range base should be 10th base power up to 1000");
             }
         }
 
-        private string ConstructRomanDigit(short value, char startSymbol, char middleSymbol, char endSymbol)
+        private string ConstructRomanDigit(short digit, char startSymbol, char middleSymbol, char endSymbol)
         {
             StringBuilder result = new StringBuilder();
-            switch (value)
+            switch (digit)
             {
                 case 1:
                     result.Append(startSymbol);

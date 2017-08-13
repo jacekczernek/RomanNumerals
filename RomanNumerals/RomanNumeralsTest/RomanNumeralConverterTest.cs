@@ -308,5 +308,19 @@ ipsum ipsum MMM", result);
             Assert.AreEqual(9, resultCollection[inputCollection[8]]);
             Assert.AreEqual(10, resultCollection[inputCollection[9]]);
         }
+
+        [TestMethod]
+        public void Convert_HeavyLoadTest_Success()
+        {
+            short input = 254;
+            string result = "";
+
+            for (int i = 1; i < 100000000; i++)
+            {
+                result = converter.Convert(input);
+            }
+
+            Assert.AreEqual("CC L IV", result);
+        }
     }
 }
