@@ -7,6 +7,9 @@ namespace RomanNumerals
     {
         public string Convert(short number)
         {
+            if (number < 1 || number > 3999)
+                throw new ArgumentOutOfRangeException("Number should be between 1 and 3999");
+
             var result = new StringBuilder();
             var numberAsCharArray = number.ToString();
             
